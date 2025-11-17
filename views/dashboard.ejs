@@ -1,11 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eaf1f9;
+      color: #333;
+      text-align: center;
+      padding-top: 100px;
+    }
+    .container {
+      background: white;
+      width: 400px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #007bff;
+    }
+    button {
+      background-color: #ff3b3b;
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    button:hover {
+      background-color: #c9302c;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Welcome to your Dashboard</h1>
+    <p>Your gender is: <%= gender %></p>
+    <p>You're successfully signed in 🎉</p>
+    <form action="/user/signout" method="POST">
+      <button type="submit">Logout</button>
+    </form>
+
+
+    
+    <!-- <h4> Emi ni dashboard</h4>
+    <% if(gender=== "male"){ %>
+        <h4> This is gender that ate the fruit</h4>
+        
+   <% } else{ %>
+    <h4>this is the gender that gave the fruit</h4>
+       <%}%>
+  </div> -->
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <h1> Emi ni dashboard</h1>
     <% if(gender=== "male"){ %>
         <h1> This is gender that ate the fruit</h1>
@@ -14,5 +86,3 @@
     <h1>this is the gender that gave the fruit</h1>
        <%}%>
   
-</body>
-</html>
