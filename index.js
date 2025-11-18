@@ -63,10 +63,10 @@ app.get("/", (req, res) => {
 });
 
 // ======== MONGODB CONNECTION ========
-mongoose
-  .connect(process.env.URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Error:", err));
+  .catch(err => console.error("❌ MongoDB Error:", err));
+
 
 // ======== START SERVER ========
 const PORT = process.env.PORT || 4000;
