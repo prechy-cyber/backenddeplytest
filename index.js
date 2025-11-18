@@ -8,51 +8,73 @@ require('dotenv').config();
 
 const PORT = process.env.PORT || 4000;
 
-// ============ Middleware ============
+// =========================
+//   MIDDLEWARE
+// =========================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ======== CORS CONFIGURATION (IMPORTANT!) =========
+const allowedOrigins = [
+  "https://frontend-4ufbbpyiy-pcybers-projects.vercel.app",
+  "https://frontend-git-main-pcybers-projects.vercel.app",
+  "https://frontend-ashy-xi-17.vercel.app"
+];
 
 app.use(cors({
-  origin: ['frontend-4ufbbpyiy-pcybers-projects.vercel.app',
-           'frontend-git-main-pcybers-projects.vercel.app',
-            'frontend-ashy-xi-17.vercel.app'],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("❌ Blocked by CORS:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
 }));
 
-// ============ MongoDB Connection ============
+// =========================
+//   MONGODB CONNECTION
+// =========================
 mongoose.connect(process.env.URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 })
 .then(() => console.log("✅ Connected to MongoDB successfully"))
-.catch(err => console.log("❌ Error connecting to MongoDB:", err));
+.catch(err => console.log("❌ MongoDB connection error:", err));
 
-// ============ Nodemailer ============
+// =========================
+//    NODEMAILER
+// =========================
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+    pass: process.env.EMAIL_PASS
+  }
 });
 
 transporter.verify((err, success) => {
-  if (err) console.log("❌ Email error:", err);
+  if (err) console.log("❌ Email Error:", err);
   else console.log("📧 Email server ready");
 });
 
-// Make transporter accessible in routes
+// Make transporter available inside routes
 app.use((req, res, next) => {
   req.transporter = transporter;
   next();
 });
 
-// ============ Routes ============
+
 app.use('/user', userRoutes);
 
-// ============ Start Server ============
+// Default route (optional)
+app.get('/', (req, res) => {
+  res.send("Backend is running...");
+});
+
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

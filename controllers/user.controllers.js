@@ -160,33 +160,58 @@ const User = require('../models/user.models');
 const Student = require('../models/student.models');
 require('dotenv').config();
 
-// ======== Pages / Test Endpoints ========
+// =========================
+//     TEST / PAGE ROUTES
+// =========================
 const getDash = (req, res) => res.send('Welcome to the backend!');
 const getSignup = (req, res) => res.status(200).json({ message: "Signup page endpoint" });
 const getSignin = (req, res) => res.status(200).json({ message: "Signin page endpoint" });
 const getDashboard = (req, res) => res.status(200).json({ message: "Dashboard loaded" });
 
-// ======== Users ========
+// =========================
+//         REGISTER
+// =========================
 const postRegister = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
+
+  // Validate empty fields
   if (!firstName || !lastName || !email || !password) {
-    return res.status(400).json({ success: false, message: "All fields are required" });
+    return res.status(400).json({
+      success: false,
+      message: "All fields are required",
+    });
   }
 
+  // Password validation
   const strongPassword = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
   if (!strongPassword.test(password)) {
     return res.status(400).json({
       success: false,
-      message: "Password must be 8+ chars with uppercase, lowercase, number, special char"
+      message:
+        "Password must be at least 8 characters, include uppercase, lowercase, number, and a special character.",
     });
   }
 
   try {
+    // Check if email exists
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(409).json({ success: false, message: "Email already exists!" });
+    if (existingUser)
+      return res.status(409).json({
+        success: false,
+        message: "Email already exists!",
+      });
 
-    const hashedPassword = await bcrypt.hash(password, saltRounds); 
-    const newUser = new User({ firstName, lastName, email, password: hashedPassword });
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create user
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
+
     await newUser.save();
 
     // Send welcome email
@@ -195,52 +220,97 @@ const postRegister = async (req, res) => {
         from: process.env.EMAIL_USER,
         to: newUser.email,
         subject: `Welcome, ${newUser.firstName}!`,
-        html: `<h1>Welcome, ${newUser.firstName}!</h1><p>Thanks for signing up 🎉</p>`,
+        html: `
+          <h2>Hello ${newUser.firstName},</h2>
+          <p>Welcome to our platform! 🎉</p>
+          <p>Your account has been created successfully.</p>
+        `,
       };
-      try { await req.transporter.sendMail(mailOptions); } 
-      catch (err) { console.error("Email error:", err); }
+
+      try {
+        await req.transporter.sendMail(mailOptions);
+      } catch (emailErr) {
+        console.log("Email sending failed:", emailErr.message);
+      }
     }
 
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
-      data: { id: newUser._id, email: newUser.email }
+      data: {
+        id: newUser._id,
+        email: newUser.email,
+      },
     });
+
   } catch (err) {
     console.error("Register error:", err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
+// =========================
+//         SIGN IN
+// =========================
 const postSignin = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ success: false, message: "All fields are required" });
+
+  if (!email || !password)
+    return res.status(400).json({ success: false, message: "All fields are required" });
 
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ success: false, message: "Invalid email or password" });
+    if (!user)
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ success: false, message: "Invalid email or password" });
+    if (!match)
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
 
-    const { _id, firstName, lastName } = user;
     return res.status(200).json({
       success: true,
       message: "User logged in successfully",
-      user: { _id, firstName, lastName, email },
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
     });
+
   } catch (err) {
     console.error("Signin error:", err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
+// =========================
+//         SIGN OUT
+// =========================
 const postSignOut = (req, res) => {
-  try { res.status(200).json({ success: true, message: "User signed out successfully" }); }
-  catch (err) { console.error("Signout error:", err); res.status(500).json({ success: false, message: "Internal server error" }); }
+  try {
+    return res.status(200).json({
+      success: true,
+      message: "User signed out successfully",
+    });
+  } catch (err) {
+    console.error("Signout error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
 };
 
-// ======== Students ========
+// =========================
+//         STUDENTS
+// =========================
 const getAllStudents = async (req, res) => {
   try {
     const students = await Student.find();
@@ -253,12 +323,25 @@ const getAllStudents = async (req, res) => {
 
 const addStudent = async (req, res) => {
   const { name, class: studentClass, occupation, age } = req.body;
-  if (!name || !studentClass || !occupation || !age) return res.status(400).json({ success: false, message: "All fields required" });
+
+  if (!name || !studentClass || !occupation || !age)
+    return res.status(400).json({ success: false, message: "All fields required" });
 
   try {
-    const newStudent = new Student({ name, class: studentClass, occupation, age });
+    const newStudent = new Student({
+      name,
+      class: studentClass,
+      occupation,
+      age,
+    });
+
     await newStudent.save();
-    return res.status(201).json({ success: true, data: newStudent });
+
+    return res.status(201).json({
+      success: true,
+      data: newStudent,
+    });
+
   } catch (err) {
     console.error("Add student error:", err);
     return res.status(500).json({ success: false, message: "Internal server error" });
@@ -276,6 +359,7 @@ module.exports = {
   getAllStudents,
   addStudent,
 };
+
 
 
 // const postSignin = async (req, res) => {
