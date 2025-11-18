@@ -185,7 +185,7 @@ const postRegister = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(409).json({ success: false, message: "Email already exists!" });
 
-    const hashedPassword = await bcrypt.hash(password, saltRounds); // ✅ Works now
+    const hashedPassword = await bcrypt.hash(password, saltRounds); 
     const newUser = new User({ firstName, lastName, email, password: hashedPassword });
     await newUser.save();
 

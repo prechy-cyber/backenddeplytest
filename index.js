@@ -12,9 +12,9 @@ const PORT = process.env.PORT || 4000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS — allow your frontend deployment URL
+
 app.use(cors({
-  origin: "https://frontend-delta-blond-89.vercel.app", // <-- replace with your Vercel URL
+  origin: ["https://frontend-delta-blond-89.vercel.app", "https://frontend-six-phi-18.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
 }));
