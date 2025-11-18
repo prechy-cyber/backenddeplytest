@@ -172,87 +172,73 @@ const getDashboard = (req, res) => res.status(200).json({ message: "Dashboard lo
 //         REGISTER
 // =========================
 const postRegister = async (req, res) => {
-    console.log("Incoming register data:", req.body);
+  console.log("=== /user/register called ===");
+  console.log("Incoming data:", req.body);
 
   const { firstName, lastName, email, password } = req.body;
 
-  // Validate empty fields
   if (!firstName || !lastName || !email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "All fields are required",
-    });
+    console.warn("Missing fields in request body");
+    return res.status(400).json({ success: false, message: "All fields are required" });
   }
 
-  // Password validation
   const strongPassword = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
   if (!strongPassword.test(password)) {
+    console.warn("Password did not meet requirements");
     return res.status(400).json({
       success: false,
-      message:
-        "Password must be at least 8 characters, include uppercase, lowercase, number, and a special character.",
+      message: "Password must be 8+ chars with uppercase, lowercase, number, special char"
     });
   }
 
   try {
-    // Check if email exists
+    console.log("Checking if user already exists:", email);
     const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return res.status(409).json({
-        success: false,
-        message: "Email already exists!",
-      });
+    if (existingUser) {
+      console.warn("Email already exists:", email);
+      return res.status(409).json({ success: false, message: "Email already exists!" });
+    }
 
-    // Hash password
+    console.log("Hashing password...");
     const hashedPassword = await bcrypt.hash(password, saltRounds);
+    console.log("Password hashed");
 
-    // Create user
-    const newUser = new User({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-    });
+    const newUser = new User({ firstName, lastName, email, password: hashedPassword });
 
+    console.log("Saving user to database...");
     await newUser.save();
+    console.log("User saved:", newUser._id);
 
-    // Send welcome email
+    // Send welcome email if transporter exists
     if (req.transporter) {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: newUser.email,
         subject: `Welcome, ${newUser.firstName}!`,
-        html: `
-          <h2>Hello ${newUser.firstName},</h2>
-          <p>Welcome to our platform! 🎉</p>
-          <p>Your account has been created successfully.</p>
-        `,
+        html: `<h1>Welcome, ${newUser.firstName}!</h1><p>Thanks for signing up 🎉</p>`,
       };
 
       try {
         await req.transporter.sendMail(mailOptions);
-      } catch (emailErr) {
-        console.log("Email sending failed:", emailErr.message);
+        console.log("Welcome email sent to:", newUser.email);
+      } catch (err) {
+        console.error("Email sending error:", err);
       }
+    } else {
+      console.warn("No transporter found for email sending");
     }
 
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
-      data: {
-        id: newUser._id,
-        email: newUser.email,
-      },
+      data: { id: newUser._id, email: newUser.email }
     });
-
   } catch (err) {
     console.error("Register error:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 
 // =========================
 //         SIGN IN
