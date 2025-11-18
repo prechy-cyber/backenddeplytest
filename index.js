@@ -1,37 +1,35 @@
+// index.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const userRoutes = require("./routes/user.routes");
 const nodemailer = require("nodemailer");
+const userRoutes = require("./routes/user.routes");
 
 dotenv.config();
 const app = express();
 
 // ======== MIDDLEWARE ========
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// ======== CORRECT CORS SETUP ========
+// ======== CORS SETUP ========
 const allowedOrigins = [
   "https://frontend-six-phi-18.vercel.app",
   "https://frontend-git-main-pcybers-projects.vercel.app",
   "https://frontend-ashy-xi-17.vercel.app"
 ];
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
-
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
+  if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });
 
@@ -40,11 +38,16 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    pass: process.env.EMAIL_PASS,
   },
 });
 
-// Attach transporter to every request
+transporter.verify((err, success) => {
+  if (err) console.error("❌ Email error:", err);
+  else console.log("📧 Email server ready");
+});
+
+// Attach transporter to all requests
 app.use((req, res, next) => {
   req.transporter = transporter;
   next();
@@ -57,15 +60,16 @@ app.get("/", (req, res) => {
   res.send("Backend server is running...");
 });
 
-// ======== DATABASE CONNECTION ========
+// ======== MONGODB CONNECTION ========
 mongoose
-  .connect(process.env.MONGO_URL)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.error("MongoDB Error:", err));
+  .connect(process.env.URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("❌ MongoDB Error:", err));
 
 // ======== START SERVER ========
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
 
 
 // const express = require('express');
