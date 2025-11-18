@@ -154,7 +154,7 @@
 
 
 // module.exports ={getDash, getAllStudents, getSignup, getSignin, getDashboard, postRegister, postSignin, postSignOut }
-const bcrypt = require('bcrypt');const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const User = require('../models/user.models');
 const Student = require('../models/student.models');
