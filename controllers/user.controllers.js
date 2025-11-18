@@ -154,7 +154,7 @@
 
 
 // module.exports ={getDash, getAllStudents, getSignup, getSignin, getDashboard, postRegister, postSignin, postSignOut }
-// const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const User = require('../models/user.models');
 const Student = require('../models/student.models');
@@ -185,7 +185,7 @@ const postRegister = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(409).json({ success: false, message: "Email already exists!" });
 
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, saltRounds); // ✅ Works now
     const newUser = new User({ firstName, lastName, email, password: hashedPassword });
     await newUser.save();
 
@@ -276,6 +276,7 @@ module.exports = {
   getAllStudents,
   addStudent,
 };
+
 
 // const postSignin = async (req, res) => {
 //   const { email, password } = req.body;
