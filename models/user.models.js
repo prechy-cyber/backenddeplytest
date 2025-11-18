@@ -7,7 +7,9 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
 }, { timestamps: true });
 
-module.exports = mongoose.models('User', userSchema);
+// Correct way to export the model
+module.exports = mongoose.model('User', userSchema);
+
 
 
 

@@ -1,6 +1,5 @@
 
 
-
 const mongoose = require("mongoose");
 
 const studentSchema = new mongoose.Schema({
@@ -10,7 +9,8 @@ const studentSchema = new mongoose.Schema({
   age: { type: Number, required: true },
 }, { timestamps: true });
 
-module.exports = mongoose.models("Student", studentSchema);
+module.exports = mongoose.model("Student", studentSchema);
+
 //const mongoose = require("mongoose");
 
 // const studentSchema = new mongoose.Schema({
