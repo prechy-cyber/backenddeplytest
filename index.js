@@ -14,9 +14,9 @@ app.use(express.json());
 // ======== CORRECT CORS SETUP ========
 const allowedOrigins = [
   "https://frontend-six-phi-18.vercel.app",
-  "https://frontend-git-main-pcybers-projects.vercel.app"
+  "https://frontend-git-main-pcybers-projects.vercel.app",
+  "https://frontend-ashy-xi-17.vercel.app"
 ];
-
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
