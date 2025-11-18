@@ -1,83 +1,71 @@
-const express = require('express');
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const userRoutes = require("./routes/user.routes");
+const nodemailer = require("nodemailer");
+
+dotenv.config();
 const app = express();
-const mongoose = require('mongoose');
-const cors = require('cors');
-const userRoutes = require('./routes/user.routes');
-const nodemailer = require('nodemailer');
-require('dotenv').config();
 
-const PORT = process.env.PORT || 4000;
-
-// =========================
-//   MIDDLEWARE
-// =========================
+// ======== MIDDLEWARE ========
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// ======== CORS CONFIGURATION (IMPORTANT!) =========
+// ======== CORRECT CORS SETUP ========
 const allowedOrigins = [
-  "https://frontend-4ufbbpyiy-pcybers-projects.vercel.app",
-  "https://frontend-git-main-pcybers-projects.vercel.app",
-  "https://frontend-ashy-xi-17.vercel.app"
+  "https://frontend-six-phi-18.vercel.app",
+  "https://frontend-git-main-pcybers-projects.vercel.app"
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("❌ Blocked by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
-}));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-// =========================
-//   MONGODB CONNECTION
-// =========================
-mongoose.connect(process.env.URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("✅ Connected to MongoDB successfully"))
-.catch(err => console.log("❌ MongoDB connection error:", err));
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
 
-// =========================
-//    NODEMAILER
-// =========================
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+// ======== NODEMAILER SETUP ========
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
 });
 
-transporter.verify((err, success) => {
-  if (err) console.log("❌ Email Error:", err);
-  else console.log("📧 Email server ready");
-});
-
-// Make transporter available inside routes
+// Attach transporter to every request
 app.use((req, res, next) => {
   req.transporter = transporter;
   next();
 });
 
+// ======== ROUTES ========
+app.use("/user", userRoutes);
 
-app.use('/user', userRoutes);
-
-// Default route (optional)
-app.get('/', (req, res) => {
-  res.send("Backend is running...");
+app.get("/", (req, res) => {
+  res.send("Backend server is running...");
 });
 
+// ======== DATABASE CONNECTION ========
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB Error:", err));
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+// ======== START SERVER ========
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 
 // const express = require('express');
