@@ -172,6 +172,8 @@ const getDashboard = (req, res) => res.status(200).json({ message: "Dashboard lo
 //         REGISTER
 // =========================
 const postRegister = async (req, res) => {
+    console.log("Incoming register data:", req.body);
+
   const { firstName, lastName, email, password } = req.body;
 
   // Validate empty fields
