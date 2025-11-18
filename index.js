@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 app.use(cors({
-  origin: ["https://frontend-delta-blond-89.vercel.app", "https://frontend-six-phi-18.vercel.app"],
+  origin: "https://frontend-ashy-xi-17.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
 }));
