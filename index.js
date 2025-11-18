@@ -1,7 +1,6 @@
 // index.js
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors");
 const dotenv = require("dotenv");
 const nodemailer = require("nodemailer");
 const userRoutes = require("./routes/user.routes");
@@ -14,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ======== CORS SETUP ========
- const allowedOrigins = [
+const allowedOrigins = [
   "https://frontend-six-phi-18.vercel.app",
   "https://frontend-git-main-pcybers-projects.vercel.app",
   "https://frontend-ashy-xi-17.vercel.app"
@@ -24,8 +23,6 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
-  } else {
-    res.setHeader("Access-Control-Allow-Origin", "null"); // block others
   }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -63,15 +60,13 @@ app.get("/", (req, res) => {
 });
 
 // ======== MONGODB CONNECTION ========
-mongoose.connect(process.env.MONGO_URL)
+mongoose.connect(process.env.URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
-
 
 // ======== START SERVER ========
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-
 
 
 // const express = require('express');
