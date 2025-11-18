@@ -14,7 +14,9 @@ app.use(express.urlencoded({ extended: true }));
 
 
 app.use(cors({
-  origin: "https://frontend-ashy-xi-17.vercel.app",
+  origin: ['frontend-4ufbbpyiy-pcybers-projects.vercel.app',
+           'frontend-git-main-pcybers-projects.vercel.app',
+            'frontend-ashy-xi-17.vercel.app'],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
 }));
