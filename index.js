@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const nodemailer = require("nodemailer");
+const cors = require("cors");
 const userRoutes = require("./routes/user.routes");
 
 dotenv.config();
@@ -14,23 +15,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // ======== CORS SETUP ========
 const allowedOrigins = [
-  "https://frontend-six-phi-18.vercel.app",
-  "https://frontend-git-main-pcybers-projects.vercel.app",
-  "https://frontend-ashy-xi-17.vercel.app"
+  "https://frontend-git-master-pcybers-projects.vercel.app"
 ];
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") return res.sendStatus(200);
-  next();
-});
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  credentials: true
+}));
 
 // ======== NODEMAILER SETUP ========
 const transporter = nodemailer.createTransport({
@@ -67,6 +59,7 @@ mongoose.connect(process.env.URI)
 // ======== START SERVER ========
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
 
 
 // const express = require('express');
