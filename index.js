@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -11,39 +9,39 @@ require('dotenv').config();
 const PORT = process.env.PORT || 4000;
 
 // ============ Middleware ============
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// CORS — allow your frontend deployment URL
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "https://frontend-six-phi-18.vercel.app", // <-- replace with your Vercel URL
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
 }));
 
 // ============ MongoDB Connection ============
-mongoose.connect(process.env.URI)
-  .then(() => console.log("✅ Connected to MongoDB successfully"))
-  .catch((err) => console.log("❌ Error connecting to MongoDB:", err));
+mongoose.connect(process.env.URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ Connected to MongoDB successfully"))
+.catch(err => console.log("❌ Error connecting to MongoDB:", err));
 
-// ============ Nodemailer Transporter (GMAIL) ============
+// ============ Nodemailer ============
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER, 
-    pass: process.env.EMAIL_PASS, 
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
-// Confirm transporter works
 transporter.verify((err, success) => {
-  if (err) {
-    console.log("❌ Email error:", err);
-  } else {
-    console.log("📧 Email server is ready");
-  }
+  if (err) console.log("❌ Email error:", err);
+  else console.log("📧 Email server ready");
 });
 
-// Make transporter available in routes
+// Make transporter accessible in routes
 app.use((req, res, next) => {
   req.transporter = transporter;
   next();
@@ -56,6 +54,64 @@ app.use('/user', userRoutes);
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+
+// const express = require('express');
+// const app = express();
+// const mongoose = require('mongoose');
+// const cors = require('cors');
+// const userRoutes = require('./routes/user.routes');
+// const nodemailer = require('nodemailer');
+// require('dotenv').config();
+
+// const PORT = process.env.PORT || 4000;
+
+// // ============ Middleware ============
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+
+// app.use(cors({
+//   origin: "https://frontend-october-clas.vercel.app",
+//   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+//   credentials: true,
+// }));
+
+// // ============ MongoDB Connection ============
+// mongoose.connect(process.env.URI)
+//   .then(() => console.log("✅ Connected to MongoDB successfully"))
+//   .catch((err) => console.log("❌ Error connecting to MongoDB:", err));
+
+// // ============ Nodemailer Transporter (GMAIL) ============
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.EMAIL_USER, 
+//     pass: process.env.EMAIL_PASS, 
+//   },
+// });
+
+// // Confirm transporter works
+// transporter.verify((err, success) => {
+//   if (err) {
+//     console.log("❌ Email error:", err);
+//   } else {
+//     console.log("📧 Email server is ready");
+//   }
+// });
+
+// // Make transporter available in routes
+// app.use((req, res, next) => {
+//   req.transporter = transporter;
+//   next();
+// });
+
+// // ============ Routes ============
+// app.use('/user', userRoutes);
+
+// // ============ Start Server ============
+// app.listen(PORT, () => {
+//   console.log(`🚀 Server running on http://localhost:${PORT}`);
+// });
 
 // const express = require('express');
 // const app = express();
