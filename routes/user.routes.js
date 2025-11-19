@@ -14,6 +14,7 @@ const {
 // ======== GET Routes ========
 router.get('/', getDash);
 router.get('/student', getAllStudents);
+router.get('/all-students', getAllStudents); 
 router.get('/signup', getSignup);
 router.get('/signin', getSignin);
 router.get('/dashboard', getDashboard);
