@@ -208,10 +208,16 @@ const postRegister = async (req, res) => {
 
     // ---- CREATE JWT ----
     const token = jwt.sign(
-      { id: newUser._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+  {
+    id: newUser._id,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
+    email: newUser.email
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: "7d" }
+);
+
 
     return res.status(201).json({
       success: true,
@@ -250,10 +256,16 @@ const postSignin = async (req, res) => {
 
     // ---- CREATE JWT ----
     const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+  {
+    id: user._id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: "7d" }
+);
+
 
     return res.status(200).json({
       success: true,
