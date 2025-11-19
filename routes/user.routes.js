@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const auth = require("../middleware/auth");
 const {
   getDash,
   getAllStudents,
@@ -13,8 +14,8 @@ const {
 
 // ======== GET Routes ========
 router.get('/', getDash);
-router.get('/student', getAllStudents);
-router.get('/all-students', getAllStudents); 
+router.get('/student', auth, getAllStudents);
+// router.get('/all-students' auth, getAllStudents); 
 router.get('/signup', getSignup);
 router.get('/signin', getSignin);
 router.get('/dashboard', getDashboard);

@@ -154,10 +154,12 @@
 
 
 // module.exports ={getDash, getAllStudents, getSignup, getSignin, getDashboard, postRegister, postSignin, postSignOut }
+
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const User = require('../models/user.models');
 const Student = require('../models/student.models');
+const jwt = require("jsonwebtoken");
 require('dotenv').config();
 
 // =========================
@@ -178,13 +180,11 @@ const postRegister = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
   if (!firstName || !lastName || !email || !password) {
-    console.warn("Missing fields in request body");
     return res.status(400).json({ success: false, message: "All fields are required" });
   }
 
   const strongPassword = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
   if (!strongPassword.test(password)) {
-    console.warn("Password did not meet requirements");
     return res.status(400).json({
       success: false,
       message: "Password must be 8+ chars with uppercase, lowercase, number, special char"
@@ -192,53 +192,43 @@ const postRegister = async (req, res) => {
   }
 
   try {
-    console.log("Checking if user already exists:", email);
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.warn("Email already exists:", email);
       return res.status(409).json({ success: false, message: "Email already exists!" });
     }
 
-    console.log("Hashing password...");
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    console.log("Password hashed");
 
-    const newUser = new User({ firstName, lastName, email, password: hashedPassword });
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword
+    });
 
-    console.log("Saving user to database...");
-    await newUser.save();
-    console.log("User saved:", newUser._id);
-
-    // Send welcome email if transporter exists
-    if (req.transporter) {
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: newUser.email,
-        subject: `Welcome, ${newUser.firstName}!`,
-        html: `<h1>Welcome, ${newUser.firstName}!</h1><p>Thanks for signing up 🎉</p>`,
-      };
-
-      try {
-        await req.transporter.sendMail(mailOptions);
-        console.log("Welcome email sent to:", newUser.email);
-      } catch (err) {
-        console.error("Email sending error:", err);
-      }
-    } else {
-      console.warn("No transporter found for email sending");
-    }
+    // ---- CREATE JWT ----
+    const token = jwt.sign(
+      { id: newUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
-      data: { id: newUser._id, email: newUser.email }
+      token,
+      user: {
+        id: newUser._id,
+        email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName
+      }
     });
   } catch (err) {
     console.error("Register error:", err);
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
 
 // =========================
 //         SIGN IN
@@ -258,15 +248,23 @@ const postSignin = async (req, res) => {
     if (!match)
       return res.status(401).json({ success: false, message: "Invalid email or password" });
 
+    // ---- CREATE JWT ----
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     return res.status(200).json({
       success: true,
       message: "User logged in successfully",
+      token,
       user: {
-        _id: user._id,
+        id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
-        email: user.email,
-      },
+        email: user.email
+      }
     });
 
   } catch (err) {
@@ -288,7 +286,6 @@ const postSignOut = (req, res) => {
       message: "User signed out successfully",
     });
   } catch (err) {
-    console.error("Signout error:", err);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -297,14 +294,13 @@ const postSignOut = (req, res) => {
 };
 
 // =========================
-//         STUDENTS
+//         STUDENT ROUTES
 // =========================
 const getAllStudents = async (req, res) => {
   try {
     const students = await Student.find();
     return res.status(200).json({ success: true, data: students });
   } catch (err) {
-    console.error("Students fetch error:", err);
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -316,14 +312,12 @@ const addStudent = async (req, res) => {
     return res.status(400).json({ success: false, message: "All fields required" });
 
   try {
-    const newStudent = new Student({
+    const newStudent = await Student.create({
       name,
       class: studentClass,
       occupation,
-      age,
+      age
     });
-
-    await newStudent.save();
 
     return res.status(201).json({
       success: true,
@@ -331,7 +325,6 @@ const addStudent = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("Add student error:", err);
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
