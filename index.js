@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ======== CORS SETUP ========
 const allowedOrigins = [
-  "https://frontend-git-master-pcybers-projects.vercel.app"
+  "https://frontend-kappa-gray-29.vercel.app"
 ];
 
 app.use(cors({
