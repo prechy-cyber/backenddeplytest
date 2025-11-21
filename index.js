@@ -15,7 +15,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // ======== CORS SETUP ========
 const allowedOrigins = [
-  "https://frontend-one-jade-15.vercel.app"
+  "https://frontend-one-jade-15.vercel.app",
+  "https://frontend-kappa-gray-29.vercel.app"
 ];
 
 app.use(cors({
